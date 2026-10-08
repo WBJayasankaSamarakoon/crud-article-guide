@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laravel 12 + React: Relational Category & Product CRUD Guide</title>
+
+    <!-- Google Fonts for Medium style reading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+    <!-- Prism Syntax Highlighting Theme (Okaidia / High Contrast) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg-body: #0d1117;
+            --bg-card: #161b22;
+            --bg-code: #161b22;
+            --border-color: #30363d;
+            --text-main: #e6edf3;
+            --text-secondary: #8b949e;
+            --accent-link: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-purple: #bc8cff;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.75;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        /* Wide Container for Spacious Code Viewing */
+        .article-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 48px 36px 80px 36px;
+            width: 100%;
+        }
+
+        /* Article Header */
+        .article-header {
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 30px;
+        }
+
+        .article-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 2.3rem;
+            font-weight: 800;
+            line-height: 1.25;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+            margin-bottom: 14px;
+        }
+
+        .article-subtitle {
+            font-family: 'Lora', serif;
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .article-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .author-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .author-name {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        /* Headings */
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-top: 48px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--accent-link);
+            margin-top: 28px;
+            margin-bottom: 12px;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: #c9d1d9;
+            font-size: 1rem;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            background: rgba(110, 118, 129, 0.2);
+            color: #f0f6fc;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.875em;
+        }
+
+        /* File Path Label */
+        .file-label {
+            display: inline-block;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #7ee787;
+            background-color: rgba(46, 160, 67, 0.15);
+            border: 1px solid rgba(46, 160, 67, 0.35);
+            padding: 5px 14px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        /* Code Block Wrapper Container */
+        .code-block-wrapper {
+            position: relative;
+            margin-top: 8px;
+            margin-bottom: 38px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            width: 100%;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            background: rgba(255, 255, 255, 0.12);
+            color: #c9d1d9;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 5px 14px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent-link);
+            color: #ffffff;
+            border-color: var(--accent-link);
+        }
+
+        .copy-btn.copied {
+            background: var(--accent-green);
+            color: #ffffff;
+        }
+
+        /* UNIFIED Padding & Left Spacing for ALL Code Blocks */
+        .code-block-wrapper pre[class*="language-"],
+        .code-block-wrapper pre {
+            margin: 0 !important;
+            padding: 24px 32px !important; /* 32px left and right padding for ALL code blocks */
+            background: #161b22 !important;
+            font-family: 'Fira Code', monospace !important;
+            font-size: 0.9rem !important;
+            line-height: 1.65 !important;
+            border-radius: 12px !important;
+            height: auto !important;
+            max-height: none !important;
+            overflow-x: auto !important;
+            overflow-y: visible !important;
+            white-space: pre !important;
+            box-sizing: border-box !important;
+            width: 100% !important;
+            display: block !important;
+        }
+
+        .code-block-wrapper code[class*="language-"],
+        .code-block-wrapper code {
+            font-family: 'Fira Code', monospace !important;
+            font-size: 0.9rem !important;
+            line-height: 1.65 !important;
+            background: transparent !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            white-space: pre !important;
+            display: block !important;
+        }
+
+        /* Custom Horizontal Scrollbar for Code Blocks */
+        pre[class*="language-"]::-webkit-scrollbar {
+            height: 8px;
+        }
+        pre[class*="language-"]::-webkit-scrollbar-track {
+            background: #11151c;
+        }
+        pre[class*="language-"]::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+        pre[class*="language-"]::-webkit-scrollbar-thumb:hover {
+            background: #484f58;
+        }
+
+        /* High-Contrast Vibrant Syntax Highlighting Colors for ALL Blocks */
+        .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #8b949e !important; font-style: italic; }
+        .token.function { color: #d2a8ff !important; font-weight: 600; }
+        .token.string, .token.char, .token.attr-value { color: #a5d6ff !important; }
+        .token.keyword { color: #ff7b72 !important; font-weight: 700; }
+        .token.class-name { color: #ffa657 !important; font-weight: 700; }
+        .token.operator, .token.entity, .token.url { color: #79c0ff !important; }
+        .token.punctuation { color: #8b949e !important; }
+        .token.property, .token.tag, .token.boolean, .token.number { color: #79c0ff !important; }
+        .token.variable { color: #7ee787 !important; }
+
+        /* Responsive Layout */
+        @media (max-width: 900px) {
+            .article-container {
+                padding: 24px 16px 60px 16px;
+            }
+            .article-title {
+                font-size: 1.7rem;
+            }
+            .code-block-wrapper pre[class*="language-"],
+            .code-block-wrapper pre {
+                padding: 16px 20px !important;
+                font-size: 0.82rem !important;
+            }
+        }
+
+        /* Article Footer */
+        .article-footer {
+            margin-top: 60px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <article class="article-container">
+
+        <!-- Article Header -->
+        <header class="article-header">
+            <h1 class="article-title">Laravel 12 + React: Relational Category & Product CRUD Guide</h1>
+            <p class="article-subtitle">A clean, code-by-code reference for building relational Category and Product CRUD features with Inertia.js, Foreign Keys, Search Filtering, and Pagination.</p>
+            
+            <div class="article-meta">
+                <div class="avatar">DEV</div>
+                <div class="author-info">
+                    <span class="author-name">Developer Guide</span>
+                    <span>Laravel 12 • React TSX • Inertia.js v2</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Section 1: Database Migrations -->
+        <section>
+            <h2>🗄️ 1. Database Migrations & Foreign Keys</h2>
+            <p>Defines the <code>categories</code> table and adds a foreign key <code>category_id</code> to the <code>products</code> table with <code>nullOnDelete()</code> constraint.</p>
+
+            <h3>Categories Migration</h3>
+            <div class="file-label">database/migrations/2026_10_08_122850_create_categories_table.php</div>
+            <div class="code-block-wrapper">
+                <button class="copy-btn" onclick="copyCode(this, 'code-mig-cat')">Copy Code</button>
+                <pre><code id="code-mig-cat" class="language-php">&lt;?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('categories', function (Blueprint $table) {
+            $table-&gt;id();
+            $table-&gt;string('name');
+            $table-&gt;text('description')-&gt;nullable();
+            $table-&gt;timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('categories');
+    }
+};</code></pre>
+            </div>
+
+            <h3>Products Migration (With Foreign Key)</h3>
+            <div class="file-label">database/migrations/2026_10_08_102736_create_products_table.php</div>
+            <div class="code-block-wrapper">
+                <button class="copy-btn" onclick="copyCode(this, 'code-mig-prod')">Copy Code</button>
+                <pre><code id="code-mig-prod" class="language-php">&lt;?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('products', function (Blueprint $table) {
+            $table-&gt;id();
+            // Foreign Key linking product to categories table
+            $table-&gt;foreignId('category_id')-&gt;nullable()-&gt;constrained('categories')-&gt;nullOnDelete();
+            $table-&gt;string('name');
+            $table-&gt;decimal('price', 10, 2);
+            $table-&gt;text('description')-&gt;nullable();
+            $table-&gt;timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('products');
+    }
+};</code></pre>
+            </div>
+        </section>
+
+        <!-- Section 2: Eloquent Models -->
+        <section>
+            <h2>📦 2. Eloquent Models & Relationship Methods</h2>
+            <p>Define <code>hasMany</code> relationship in <code>Category</code> model and <code>belongsTo</code> in <code>Product</code> model.</p>
+
+            <h3>Category Model (HasMany Products)</h3>
+            <div class="file-label">app/Models/Category.php</div>
+            <div class="code-block-wrapper">
+                <button class="copy-btn" onclick="copyCode(this, 'code-mod-cat')">Copy Code</button>
+                <pre><code id="code-mod-cat" class="language-php">&lt;?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Category extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['name', 'description'];
+
+    // Category has many products
+    public function products(): HasMany
+    {
+        return $this-&gt;hasMany(Product::class);
+    }
+}</code></pre>
+            </div>
+
+            <h3>Product Model (BelongsTo Category)</h3>
+            <div class="file-label">app/Models/Product.php</div>
+            <div class="code-block-wrapper">
+                <button class="copy-btn" onclick="copyCode(this, 'code-mod-prod')">Copy Code</button>
+                <pre><code id="code-mod-prod" class="language-php">&lt;?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Product extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'category_id',
+        'name',
+        'price',
+        'description',
+    ];
+
+    // Product belongs to a category
+    public function category(): BelongsTo
+    {
+        return $this-&gt;belongsTo(Category::class);
+    }
+}</code></pre>
+            </div>
+        </section>
+
+        <!-- Section 3: Web Routes -->
+        <section>
+            <h2>🌐 3. Web Routes (web.php)</h2>
+            <p>Define Web routes for both Product and Category CRUD operations.</p>
+            
+            <div class="file-label">routes/web.php</div>
+            <div class="code-block-wrapper">
+                <button class="copy-btn" onclick="copyCode(this, 'code-routes')">Copy Code</button>
+                <pre><code id="code-routes" class="language-php">&lt;?php
+
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
+
+Route::get('/', function () {
+    return Inertia::render('welcome');
+})-&gt;name('home');
+
+Route::middleware(['auth'])-&gt;group(function () {
+    Route::get('dashboard', function () {
+        return Inertia::render('dashboard');
+    })-&gt;name('dashboard');
+
+    // Product CRUD Routes
+    Route::get('/products', [ProductController::class, 'index'])-&gt;name('products.index');
+    Route::get('/products/create', [ProductController::class, 'create'])-&gt;name('products.create');
+    Route::post('/products', [ProductController::class, 'store'])-&gt;name('products.store');
+    Route::get('/products/{product}/edit', [ProductController::class, 'edit'])-&gt;name('products.edit');
+    Route::put('/products/{product}', [ProductController::class, 'update'])-&gt;name('products.update');
+    Route::delete('/products/{product}', [ProductController::class, 'destroy'])-&gt;name('products.destroy');
+
+    // Category CRUD Routes
+    Route::get('/categories', [CategoryController::class, 'index'])-&gt;name('categories.index');
+    Route::get('/categories/create', [CategoryController::class, 'create'])-&gt;name('categories.create');
+    Route::post('/categories', [CategoryController::class, 'store'])-&gt;name('categories.store');
+    Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])-&gt;name('categories.edit');
+    Route::put('/categories/{category}', [CategoryController::class, 'update'])-&gt;name('categories.update');
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])-&gt;name('categories.destroy');
+});
+
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';</code></pre>
+            </div>
+        </section>
+
+        <!-- Section 4: Controllers -->
+        <section>
+            <h2>🎮 4. Controllers (Search & Pagination)</h2>
+            <p>CategoryController implements <strong>Search Bar Filtering</strong> and <strong>Pagination</strong> (<code>paginate(5)</code>). ProductController uses <strong>Eager Loading</strong> (<code>Product::with('category')->get()</code>).</p>
+
+            <h3>Category Controller (With Search & Pagination)</h3>
+            <div class="file-label">app/Http/Controllers/CategoryController.php</div>
+            <div class="code-block-wrapper">
+                <button class="copy-btn" onclick="copyCode(this, 'code-ctrl-cat')">Copy Code</button>
+                <pre><code id="code-ctrl-cat" class="language-php">&lt;?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Category;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class CategoryController extends Controller
+{
+    // Search Filter & 5 items per page pagination
+    public function index(Request $request)
+    {
+        $search = $request-&gt;input('search');
+
+        $categories = Category::when($search, function ($query, $search) {
+            $query-&gt;where('name', 'like', "%{$search}%")
+                  -&gt;orWhere('description', 'like', "%{$search}%");
+        })
+        -&gt;latest()
+        -&gt;paginate(5)
+        -&gt;withQueryString();
+
+        return Inertia::render('Categories/Index', [
+            'categories' =&gt; $categories,
+            'filters' =&gt; [
+                'search' =&gt; $search ?? '',
+            ],
+        ]);
+    }
+
+    public function create()
+    {
+        return Inertia::render('Categories/Create');
+    }
+
+    public function store(Request $request)
+    {
+        $request-&gt;validate([
+            'name' =&gt; 'required|string|max:255',
+            'description' =&gt; 'nullable|string',
+        ]);
+
+        Category::create($request-&gt;all());
+
+        return redirect()-&gt;route('categories.index')-&gt;with('success', 'Category created successfully.');
+    }
+
+    public function edit(Category $category)
+    {
+        return Inertia::render('Categories/Edit', compact('category'));
+    }
+
+    public function update(Request $request, Category $category)
+    {
+        $request-&gt;validate([
+            'name' =&gt; 'required|string|max:255',
+            'description' =&gt; 'nullable|string',
+        ]);
+
+        $category-&gt;update($request-&gt;all());
+
+        return redirect()-&gt;route('categories.index')-&gt;with('success', 'Category updated successfully.');
+    }
+
+    public function destroy(Category $category)
+    {
+        $category-&gt;delete();
+
+        return redirect()-&gt;route('categories.index')-&gt;with('success', 'Category deleted successfully.');
+    }
+}</code></pre>
+            </div>
+
+            <h3>Product Controller (Eager Loading Category)</h3>
+            <div class="file-label">app/Http/Controllers/ProductController.php</div>
+            <div class="code-block-wrapper">
+                <button class="copy-btn" onclick="copyCode(this, 'code-ctrl-prod')">Copy Code</button>
+                <pre><code id="code-ctrl-prod" class="language-php">&lt;?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Category;
+use App\Models\Product;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class ProductController extends Controller
+{
+    // Eager loading product category
+    public function index()
+    {
+        $products = Product::with('category')-&gt;get();
+
+        return Inertia::render('Products/Index', compact('products'));
+    }
+
+    // Pass categories for dropdown selection
+    public function create()
+    {
+        $categories = Category::all();
+
+        return Inertia::render('Products/Create', compact('categories'));
+    }
+
+    public function store(Request $request)
+    {
+        $request-&gt;validate([
+            'name' =&gt; 'required|string|max:255',
+            'price' =&gt; 'required|numeric|min:0',
+            'description' =&gt; 'nullable|string',
+            'category_id' =&gt; 'nullable|exists:categories,id',
+        ]);
+
+        Product::create($request-&gt;all());
+
+        return redirect()-&gt;route('products.index')-&gt;with('success', 'Product created successfully.');
+    }
+
+    public function edit(Product $product)
+    {
+        $categories = Category::all();
+
+        return Inertia::render('Products/Edit', compact('product', 'categories'));
+    }
+
+    public function update(Request $request, Product $product)
+    {
+        $request-&gt;validate([
+            'name' =&gt; 'required|string|max:255',
+            'price' =&gt; 'required|numeric|min:0',
+            'description' =&gt; 'nullable|string',
+            'category_id' =&gt; 'nullable|exists:categories,id',
+        ]);
+
+        $product-&gt;update($request-&gt;all());
+
+        return redirect()-&gt;route('products.index')-&gt;with('success', 'Product updated successfully.');
+    }
+
+    public function destroy(Product $product)
+    {
+        $product-&gt;delete();
+
+        return redirect()-&gt;route('products.index')-&gt;with('success', 'Product deleted successfully.');
+    }
+}</code></pre>
+            </div>
+        </section>
+
+        <!-- Section 5: Category React Pages -->
+        <section>
+            <h2>🏷️ 5. Category React Pages</h2>
+
+            <h3>Category Index Page (Search Bar & Pagination Controls)</h3>
+            <div class="file-label">resources/js/pages/Categories/Index.tsx</div>
+            <div class="code-block-wrapper">
+                <button class="copy-btn" onclick="copyCode(this, 'code-cat-idx')">Copy Code</button>
+                <pre><code id="code-cat-idx" class="language-tsx">import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+
+interface Category {
+    id: number;
+    name: string;
+    description: string | null;
+}
+
+interface PaginationLink {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
+interface CategoriesPageProps {
+    categories: {
+        data: Category[];
+        links: PaginationLink[];
+    };
+    filters: {
+        search: string;
+    };
+}
+
+export default function Index({ categories, filters }: CategoriesPageProps) {
+    const [search, setSearch] = useState(filters.search || '');
+    const { delete: destroy, processing } = useForm();
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        router.get(route('categories.index'), { search }, { preserveState: true });
+    };
+
+    const handleDelete = (categoryId: number) => {
+        if (confirm('Are you sure you want to delete this category?')) {
+            destroy(route('categories.destroy', categoryId));
+        }
+    };
+
+    return (
+        &lt;AppLayout breadcrumbs={[{ title: 'Categories', href: '/categories' }]}&gt;
+            &lt;Head title="Categories" /&gt;
+
+            &lt;div className="flex items-center justify-between gap-4 p-4"&gt;
+                &lt;Link href={route('categories.create')}&gt;
+                    &lt;Button&gt;Create Category&lt;/Button&gt;
+                &lt;/Link&gt;
+
+                {/* Search Bar Filter */}
+                &lt;form onSubmit={handleSearch} className="flex gap-2"&gt;
+                    &lt;Input
+                        placeholder="Search Categories..."
+                        value={search}
+                        onChange={(e) =&gt; setSearch(e.target.value)}
+                        className="w-64"
+                    /&gt;
+                    &lt;Button type="submit" variant="outline"&gt;Search&lt;/Button&gt;
+                &lt;/form&gt;
+            &lt;/div&gt;
+
+            &lt;div className="p-4"&gt;
+                &lt;Table&gt;
+                    &lt;TableHeader&gt;
+                        &lt;TableRow&gt;
+                            &lt;TableHead className="w-[100px]"&gt;ID&lt;/TableHead&gt;
+                            &lt;TableHead&gt;Name&lt;/TableHead&gt;
+                            &lt;TableHead&gt;Description&lt;/TableHead&gt;
+                            &lt;TableHead className="text-right"&gt;Actions&lt;/TableHead&gt;
+                        &lt;/TableRow&gt;
+                    &lt;/TableHeader&gt;
+                    &lt;TableBody&gt;
+                        {categories.data.map((category) =&gt; (
+                            &lt;TableRow key={category.id}&gt;
+                                &lt;TableCell&gt;{category.id}&lt;/TableCell&gt;
+                                &lt;TableCell&gt;{category.name}&lt;/TableCell&gt;
+                                &lt;TableCell&gt;{category.description || '-'}&lt;/TableCell&gt;
+                                &lt;TableCell className="text-right"&gt;
+                                    &lt;Link href={route('categories.edit', category.id)}&gt;
+                                        &lt;Button variant="outline" className="mr-2"&gt;Edit&lt;/Button&gt;
+                                    &lt;/Link&gt;
+                                    &lt;Button
+                                        disabled={processing}
+                                        onClick={() =&gt; handleDelete(category.id)}
+                                        className="bg-red-500 hover:bg-red-700"
+                                    &gt;
+                                        Delete
+                                    &lt;/Button&gt;
+                                &lt;/TableCell&gt;
+                            &lt;/TableRow&gt;
+                        ))}
+                    &lt;/TableBody&gt;
+                &lt;/Table&gt;
+
+                {/* Pagination Controls */}
+                &lt;div className="flex justify-center gap-1 mt-4"&gt;
+                    {categories.links.map((link, key) =&gt; (
+                        link.url ? (
+                            &lt;Link
+                                key={key}
+                                href={link.url}
+                                className={`px-3 py-1 rounded border text-sm ${
+                                    link.active ? 'bg-blue-600 text-white font-bold' : 'bg-white text-gray-700 hover:bg-gray-100'
+                                }`}
+                                dangerouslySetInnerHTML={{ __html: link.label }}
+                            /&gt;
+                        ) : (
+                            &lt;span
+                                key={key}
+                                className="px-3 py-1 rounded border text-sm text-gray-400 cursor-not-allowed"
+                                dangerouslySetInnerHTML={{ __html: link.label }}
+                            /&gt;
+                        )
+                    ))}
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/AppLayout&gt;
+    );
+}</code></pre>
+            </div>
+
+            <h3>Category Create Page</h3>
+            <div class="file-label">resources/js/pages/Categories/Create.tsx</div>
+            <div class="code-block-wrapper">
+                <button class="copy-btn" onclick="copyCode(this, 'code-cat-create')">Copy Code</button>
+                <pre><code id="code-cat-create" class="language-tsx">import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, useForm } from '@inertiajs/react';
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Create a New Category',
+        href: '/categories',
+    },
+];
+
+export default function Create() {
+    const { data, setData, post, processing, errors } = useForm({
+        name: '',
+        description: '',
+    });
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        post(route('categories.store'));
+    };
+
+    return (
+        &lt;AppLayout breadcrumbs={breadcrumbs}&gt;
+            &lt;Head title="Create a New Category" /&gt;
+            &lt;div className="w-8/12 p-4"&gt;
+                &lt;form onSubmit={handleSubmit}&gt;
+                    {errors.name && &lt;div className="text-red-500"&gt;{errors.name}&lt;/div&gt;}
+                    {errors.description && &lt;div className="text-red-500"&gt;{errors.description}&lt;/div&gt;}
+
+                    &lt;div className="gap-1.5 mb-4"&gt;
+                        &lt;Label htmlFor="name"&gt;Category Name&lt;/Label&gt;
+                        &lt;Input
+                            placeholder="Category Name"
+                            value={data.name}
+                            onChange={(e) =&gt; setData('name', e.target.value)}
+                        /&gt;
+                    &lt;/div&gt;
+                    &lt;div className="gap-1.5 mb-4"&gt;
+                        &lt;Label htmlFor="description"&gt;Description&lt;/Label&gt;
+                        &lt;Textarea
+                            placeholder="Category Description"
+                            value={data.description}
+                            onChange={(e) =&gt; setData('description', e.target.value)}
+                        /&gt;
+                    &lt;/div&gt;
+                    &lt;Button type="submit" className="mt-4" disabled={processing}&gt;
+                        Add Category
+                    &lt;/Button&gt;
+                &lt;/form&gt;
+            &lt;/div&gt;
+        &lt;/AppLayout&gt;
+    );
+}</code></pre>
+            </div>
+
+            <h3>Category Edit Page</h3>
+            <div class="file-label">resources/js/pages/Categories/Edit.tsx</div>
+            <div class="code-block-wrapper">
+                <button class="copy-btn" onclick="copyCode(this, 'code-cat-edit')">Copy Code</button>
+                <pre><code id="code-cat-edit" class="language-tsx">import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, useForm } from '@inertiajs/react';
+
+interface Category {
+    id: number;
+    name: string;
+    description: string | null;
+}
+
+interface EditProps {
+    category: Category;
+}
+
+export default function Edit({ category }: EditProps) {
+    const { data, setData, put, processing, errors } = useForm({
+        name: category.name || '',
+        description: category.description || '',
+    });
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        put(route('categories.update', category.id));
+    };
+
+    return (
+        &lt;AppLayout breadcrumbs={[{ title: 'Edit Category', href: '/categories' }]}&gt;
+            &lt;Head title="Edit Category" /&gt;
+            &lt;div className="w-8/12 p-4"&gt;
+                &lt;form onSubmit={handleSubmit}&gt;
+                    {errors.name && &lt;div className="text-red-500"&gt;{errors.name}&lt;/div&gt;}
+                    {errors.description && &lt;div className="text-red-500"&gt;{errors.description}&lt;/div&gt;}
+
+                    &lt;div className="gap-1.5 mb-4"&gt;
+                        &lt;Label htmlFor="name"&gt;Category Name&lt;/Label&gt;
+                        &lt;Input
+                            placeholder="Category Name"
+                            value={data.name}
+                            onChange={(e) =&gt; setData('name', e.target.value)}
+                        /&gt;
+                    &lt;/div&gt;
+                    &lt;div className="gap-1.5 mb-4"&gt;
+                        &lt;Label htmlFor="description"&gt;Description&lt;/Label&gt;
+                        &lt;Textarea
+                            placeholder="Category Description"
+                            value={data.description}
+                            onChange={(e) =&gt; setData('description', e.target.value)}
+                        /&gt;
+                    &lt;/div&gt;
+                    &lt;Button type="submit" className="mt-4" disabled={processing}&gt;
+                        Update Category
+                    &lt;/Button&gt;
+                &lt;/form&gt;
+            &lt;/div&gt;
+        &lt;/AppLayout&gt;
+    );
+}</code></pre>
+            </div>
+        </section>
+
+        <!-- Section 6: Product React Pages -->
+        <section>
+            <h2>📄 6. Product React Pages (Category Dropdown & Display)</h2>
+
+            <h3>Product Index Page (Displaying Related Category)</h3>
+            <div class="file-label">resources/js/pages/Products/Index.tsx</div>
+            <div class="code-block-wrapper">
+                <button class="copy-btn" onclick="copyCode(this, 'code-prod-idx')">Copy Code</button>
+                <pre><code id="code-prod-idx" class="language-tsx">import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, useForm } from '@inertiajs/react';
+
+interface Category {
+    id: number;
+    name: string;
+}
+
+interface Product {
+    id: number;
+    name: string;
+    price: number;
+    description: string | null;
+    category?: Category | null;
+}
+
+interface ProductsPageProps {
+    products?: Product[];
+}
+
+export default function Index({ products = [] }: ProductsPageProps) {
+    const { delete: destroy, processing } = useForm();
+
+    const handleDelete = (productId: number) => {
+        if (confirm('Are you sure you want to delete this product?')) {
+            destroy(route('products.destroy', productId));
+        }
+    };
+
+    return (
+        &lt;AppLayout breadcrumbs={[{ title: 'Products', href: '/products' }]}&gt;
+            &lt;Head title="Products" /&gt;
+            &lt;div className="gap-4 rounded-xl p-4"&gt;
+                &lt;Link href={route('products.create')}&gt;
+                    &lt;Button&gt;Create Product&lt;/Button&gt;
+                &lt;/Link&gt;
+            &lt;/div&gt;
+
+            &lt;div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4"&gt;
+                &lt;Table&gt;
+                    &lt;TableHeader&gt;
+                        &lt;TableRow&gt;
+                            &lt;TableHead className="w-[100px]"&gt;ID&lt;/TableHead&gt;
+                            &lt;TableHead&gt;Category&lt;/TableHead&gt;
+                            &lt;TableHead&gt;Name&lt;/TableHead&gt;
+                            &lt;TableHead&gt;Price&lt;/TableHead&gt;
+                            &lt;TableHead&gt;Description&lt;/TableHead&gt;
+                            &lt;TableHead className="text-right"&gt;Actions&lt;/TableHead&gt;
+                        &lt;/TableRow&gt;
+                    &lt;/TableHeader&gt;
+                    &lt;TableBody&gt;
+                        {products.map((product) =&gt; (
+                            &lt;TableRow key={product.id}&gt;
+                                &lt;TableCell className="font-medium"&gt;{product.id}&lt;/TableCell&gt;
+                                &lt;TableCell&gt;{product.category ? product.category.name : '-'}&lt;/TableCell&gt;
+                                &lt;TableCell&gt;{product.name}&lt;/TableCell&gt;
+                                &lt;TableCell&gt;{product.price}&lt;/TableCell&gt;
+                                &lt;TableCell&gt;{product.description || '-'}&lt;/TableCell&gt;
+                                &lt;TableCell className="text-right"&gt;
+                                    &lt;Link href={route('products.edit', product.id)}&gt;
+                                        &lt;Button variant="outline" className="mr-2"&gt;Edit&lt;/Button&gt;
+                                    &lt;/Link&gt;
+                                    &lt;Button disabled={processing} onClick={() =&gt; handleDelete(product.id)} className="bg-red-500 hover:bg-red-700"&gt;
+                                        {processing ? 'Deleting...' : 'Delete'}
+                                    &lt;/Button&gt;
+                                &lt;/TableCell&gt;
+                            &lt;/TableRow&gt;
+                        ))}
+                    &lt;/TableBody&gt;
+                &lt;/Table&gt;
+                &lt;TableCaption&gt;A list of your products.&lt;/TableCaption&gt;
+            &lt;/div&gt;
+        &lt;/AppLayout&gt;
+    );
+}</code></pre>
+            </div>
+
+            <h3>Product Create Page (Category Dropdown Selector)</h3>
+            <div class="file-label">resources/js/pages/Products/Create.tsx</div>
+            <div class="code-block-wrapper">
+                <button class="copy-btn" onclick="copyCode(this, 'code-prod-create')">Copy Code</button>
+                <pre><code id="code-prod-create" class="language-tsx">import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from "@/components/ui/textarea";
+import AppLayout from '@/layouts/app-layout';
+import { Head, useForm } from '@inertiajs/react';
+
+interface Category {
+    id: number;
+    name: string;
+}
+
+interface CreateProps {
+    categories?: Category[];
+}
+
+export default function Create({ categories = [] }: CreateProps) {
+    const { data, setData, post, processing, errors } = useForm({
+        name: '',
+        price: '',
+        description: '',
+        category_id: '',
+    });
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        post(route('products.store'));
+    };
+
+    return (
+        &lt;AppLayout breadcrumbs={[{ title: 'Create Product', href: '/products/create' }]}&gt;
+            &lt;Head title="Create Product" /&gt;
+            &lt;div className="w-8/12 p-4"&gt;
+                &lt;form onSubmit={handleSubmit}&gt;
+                    {/* Category Dropdown Selection */}
+                    &lt;div className="gap-1.5 mb-4"&gt;
+                        &lt;Label htmlFor="category"&gt;Category&lt;/Label&gt;
+                        &lt;select
+                            className="w-full rounded-md border border-gray-300 p-2 text-sm bg-white text-gray-900"
+                            value={data.category_id}
+                            onChange={(e) =&gt; setData('category_id', e.target.value)}
+                        &gt;
+                            &lt;option value=""&gt;Select Category (Optional)&lt;/option&gt;
+                            {categories.map((cat) =&gt; (
+                                &lt;option key={cat.id} value={cat.id}&gt;
+                                    {cat.name}
+                                &lt;/option&gt;
+                            ))}
+                        &lt;/select&gt;
+                    &lt;/div&gt;
+
+                    &lt;div className="gap-1.5 mb-4"&gt;
+                        &lt;Label htmlFor="name"&gt;Name&lt;/Label&gt;
+                        &lt;Input placeholder="Product Name" value={data.name} onChange={(e) =&gt; setData('name', e.target.value)} /&gt;
+                    &lt;/div&gt;
+
+                    &lt;div className="gap-1.5 mb-4"&gt;
+                        &lt;Label htmlFor="price"&gt;Price&lt;/Label&gt;
+                        &lt;Input placeholder="Price" value={data.price} onChange={(e) =&gt; setData('price', e.target.value)} /&gt;
+                    &lt;/div&gt;
+
+                    &lt;div className="gap-1.5 mb-4"&gt;
+                        &lt;Label htmlFor="description"&gt;Description&lt;/Label&gt;
+                        &lt;Textarea placeholder="Description" value={data.description} onChange={(e) =&gt; setData('description', e.target.value)} /&gt;
+                    &lt;/div&gt;
+
+                    &lt;Button type="submit" disabled={processing}&gt;
+                        Add Product
+                    &lt;/Button&gt;
+                &lt;/form&gt;
+            &lt;/div&gt;
+        &lt;/AppLayout&gt;
+    );
+}</code></pre>
+            </div>
+
+            <h3>Product Edit Page (Category Dropdown Selector)</h3>
+            <div class="file-label">resources/js/pages/Products/Edit.tsx</div>
+            <div class="code-block-wrapper">
+                <button class="copy-btn" onclick="copyCode(this, 'code-prod-edit')">Copy Code</button>
+                <pre><code id="code-prod-edit" class="language-tsx">import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from "@/components/ui/textarea";
+import AppLayout from '@/layouts/app-layout';
+import { Head, useForm } from '@inertiajs/react';
+
+interface Category {
+    id: number;
+    name: string;
+}
+
+interface Product {
+    id: number;
+    name: string;
+    price: number;
+    description: string | null;
+    category_id: number | null;
+}
+
+interface EditProps {
+    product: Product;
+    categories?: Category[];
+}
+
+export default function Edit({ product, categories = [] }: EditProps) {
+    const { data, setData, put, processing, errors } = useForm({
+        name: product.name || '',
+        price: product.price || '',
+        description: product.description || '',
+        category_id: product.category_id ? String(product.category_id) : '',
+    });
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        put(route('products.update', product.id));
+    };
+
+    return (
+        &lt;AppLayout breadcrumbs={[{ title: 'Edit Product', href: '/products' }]}&gt;
+            &lt;Head title="Edit Product" /&gt;
+            &lt;div className="w-8/12 p-4"&gt;
+                &lt;form onSubmit={handleSubmit}&gt;
+                    &lt;div className="gap-1.5 mb-4"&gt;
+                        &lt;Label htmlFor="category"&gt;Category&lt;/Label&gt;
+                        &lt;select
+                            className="w-full rounded-md border border-gray-300 p-2 text-sm bg-white text-gray-900"
+                            value={data.category_id}
+                            onChange={(e) =&gt; setData('category_id', e.target.value)}
+                        &gt;
+                            &lt;option value=""&gt;Select Category (Optional)&lt;/option&gt;
+                            {categories.map((cat) =&gt; (
+                                &lt;option key={cat.id} value={cat.id}&gt;
+                                    {cat.name}
+                                &lt;/option&gt;
+                            ))}
+                        &lt;/select&gt;
+                    &lt;/div&gt;
+
+                    &lt;div className="gap-1.5 mb-4"&gt;
+                        &lt;Label htmlFor="name"&gt;Name&lt;/Label&gt;
+                        &lt;Input placeholder="Product Name" value={data.name} onChange={(e) =&gt; setData('name', e.target.value)} /&gt;
+                    &lt;/div&gt;
+
+                    &lt;div className="gap-1.5 mb-4"&gt;
+                        &lt;Label htmlFor="price"&gt;Price&lt;/Label&gt;
+                        &lt;Input placeholder="Price" value={data.price} onChange={(e) =&gt; setData('price', e.target.value)} /&gt;
+                    &lt;/div&gt;
+
+                    &lt;div className="gap-1.5 mb-4"&gt;
+                        &lt;Label htmlFor="description"&gt;Description&lt;/Label&gt;
+                        &lt;Textarea placeholder="Description" value={data.description} onChange={(e) =&gt; setData('description', e.target.value)} /&gt;
+                    &lt;/div&gt;
+
+                    &lt;Button type="submit" disabled={processing}&gt;
+                        Update Product
+                    &lt;/Button&gt;
+                &lt;/form&gt;
+            &lt;/div&gt;
+        &lt;/AppLayout&gt;
+    );
+}</code></pre>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="article-footer">
+            <p>Published for Laravel 12 & React Developer Practice • Code Reference from <code>my-app</code></p>
+        </footer>
+
+    </article>
+
+    <!-- Prism JS Syntax Highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-php.min.js"></script>
+
+    <!-- Interactive Copy Code & Prism Re-Highlight Script -->
+    <script>
+        function copyCode(button, targetId) {
+            const codeElement = document.getElementById(targetId);
+            const textToCopy = codeElement.innerText;
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const originalText = button.innerText;
+                button.innerText = 'Copied!';
+                button.classList.add('copied');
+
+                setTimeout(() => {
+                    button.innerText = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+
+        // Trigger Prism syntax highlighting for ALL code blocks after components load
+        window.addEventListener('load', function() {
+            if (typeof Prism !== 'undefined') {
+                Prism.highlightAll();
+            }
+        });
+    </script>
+</body>
+
+</html>
